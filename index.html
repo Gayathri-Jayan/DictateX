@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Speech to Text & Text to Speech</title>
+</head>
+<body>
+    <h1>Speech to Text & Text to Speech</h1>
+
+    <button id="record-btn">Start Recording</button>
+    <p id="output-text">Recognized Text: </p>
+
+    <textarea id="text-input" placeholder="Type text to convert to speech..."></textarea>
+    <button id="speak-btn">Speak</button>
+
+    <script>
+        document.getElementById("record-btn").addEventListener("click", function() {
+            const formData = new FormData();
+            const audioBlob = new Blob([], { type: "audio/wav" });  // Replace with actual recorded audio
+            formData.append("audio", audioBlob);
+
+            fetch("http://127.0.0.1:5000/speech-to-text", {
+                method: "POST",
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById("output-text").innerText = "Recognized Text: " + (data.text || data.error);
+            })
+            .catch(error => console.error("Error:", error));
+        });
+
+        document.getElementById("speak-btn").addEventListener("click", function() {
+            const text = document.getElementById("text-input").value;
+            fetch("http://127.0.0.1:5000/text-to-speech", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ text: text })
+            })
+            .then(response => response.json())
+            .then(data => alert(data.message || data.error))
+            .catch(error => console.error("Error:", error));
+        });
+    </script>
+</body>
+</html>
